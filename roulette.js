@@ -2,21 +2,15 @@
 	var Roulette = function (options) {
 		var defaultSettings = {
 			maxPlayCount: null, // x >= 0 or null
-			speed: 150, // x > 0
+			speed: 20, // x > 0
 			stopImageNumber: null, // x >= 0 or null or -1
 			rollCount: 3, // x >= 0
-			duration: 1.5, //(x second)
+			duration: 1, //(x second)
 			stopCallback: function () {
-				//$('.obtn').removeAttr('disabled');
-				$(".roulette_container").click(function () {
-					$(".rwrapper").hide(0, function () {
-						$(".quest-modal").hide(0);
-					})
-				});
+				$('.start').removeAttr('disabled');
 			},
 			startCallback: function () {
-				//$('.obtn').attr('disabled', 'true');
-				$('.roulette_container').off("click");
+				$('.start').attr('disabled', 'true');
 			},
 			slowDownCallback: function () {
 			}
