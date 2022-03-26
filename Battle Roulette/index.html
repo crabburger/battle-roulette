@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Battle Roulette</title>
+  <link rel="shortcut icon" href="#">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="../.js/d3.v7.min.js"></script>
+  <script src="../.js/jquery3.6.0.min.js"></script>
+  <script src="../.js/papaparse.min.js"></script>
+  <script src="roulette.js"></script>
+  <style>
+    @keyframes rainbow {
+      0% {
+        border-color: violet;
+      }
+
+      14% {
+        border-color: indigo;
+      }
+
+      28% {
+        border-color: blue;
+      }
+
+      42% {
+        border-color: green;
+      }
+
+      55% {
+        border-color: yellow;
+      }
+
+      71% {
+        border-color: orange;
+      }
+
+      86% {
+        border-color: red;
+      }
+
+      100% {
+        border-color: violet;
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      --light: hsl(220, 50%, 90%);
+      --primary: hsl(255, 30%, 55%);
+      --focus: hsl(210, 90%, 50%);
+      --border-color: hsla(0, 0%, 100%, .2);
+      --global-background: hsl(220, 25%, 10%);
+      --background: linear-gradient(to bottom-right, hsl(210, 95%, 25%), hsl(283, 95%, 59%));
+      --shadow-1: rgb(64, 87, 191);
+      --shadow-2: rgb(255, 94, 0);
+      background: var(--global-background);
+    }
+
+    .wrapper {
+      width: 100%;
+      height: 100vh;
+      position: fixed;
+      top: 0px;
+      left: 50%;
+      transform: translate(-50%);
+    }
+
+    .q-btn-layout {
+      display: grid;
+      width: 100%;
+      height: 100%;
+      grid-template-columns: auto auto auto auto auto auto auto;
+      grid-template-rows: auto auto auto;
+      gap: 10px;
+    }
+
+    .q-btn {
+      background: linear-gradient(0.50turn, #a133fc, #000000, #63125f);
+      border: none;
+      color: white;
+      height: 100%;
+      width: 100%;
+      text-align: center;
+      display: inline-block;
+      vertical-align: middle;
+      font-weight: 700;
+      font-size: 100px;
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .disabled {
+      background-color: #888;
+      opacity: 0.05;
+      cursor: not-allowed;
+    }
+
+    .xbtn {
+      width: auto;
+      height: 10%;
+      text-align: center;
+      display: inline-block;
+      vertical-align: middle;
+      margin: 0;
+      color: rgb(255, 255, 255);
+      font-weight: 700;
+      font-size: 3vh;
+      z-index: 2;
+      border-radius: 5px;
+      position: fixed;
+      left: 30px;
+      bottom: 30%;
+      cursor: pointer;
+    }
+
+    .xbtn:hover {
+      transform: translateY(2px);
+    }
+
+    .xbtn:active {
+      transform: translateY(6px);
+    }
+
+    .obtn {
+      width: auto;
+      height: 10%;
+      text-align: center;
+      display: inline-block;
+      vertical-align: middle;
+      margin: 0;
+      color: rgb(255, 255, 255);
+      font-weight: 700;
+      font-size: 7vh;
+      z-index: 2;
+      border-radius: 5px;
+      position: fixed;
+      right: 30px;
+      bottom: 30%;
+      cursor: pointer;
+    }
+
+    .obtn:hover {
+      transform: translateY(2px);
+    }
+
+    .obtn:active {
+      transform: translateY(6px);
+    }
+
+    .quest-modal {
+      position: fixed;
+      display: none;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: rgb(0, 0, 0);
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .card {
+      width: 90%;
+      height: 95%;
+      background-color: white;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #000000;
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+      font-size: 10vh;
+    }
+
+    .qimages {
+      height: 90vh;
+      width: auto;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .rwrapper {
+      height: 100vh;
+      width: 100vw;
+      position: absolute;
+      background-color: rgb(0, 0, 0);
+      background-color: rgba(0, 0, 0, 0.9);
+      z-index: 5;
+    }
+
+    .roulette_container {
+      position: absolute;
+      left: 10%;
+      top: 50%;
+      height: 500px;
+      width: 500px;
+      overflow: hidden;
+      transform: translate(-10%, -50%);
+      border-radius: 50px;
+      background-color: white;
+      border: 20px solid;
+      animation: rainbow 10s infinite running;
+      cursor: pointer;
+    }
+
+    .roulette_img {
+      position: relative;
+      left: 50%;
+      height: 500px;
+      width: 500px;
+      transform: translate(-50%);
+    }
+
+    .explain {
+      position: absolute;
+      right: 5%;
+      top: 50%;
+      transform: translate(-5%, -50%);
+      background-color: black;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .exgrid {
+      display: flex;
+      align-items: center;
+      font-size: 4vh;
+      background-color: white;
+      height: 11vh;
+      padding: 5px;
+    }
+
+    .explain_img {
+      height: 10vh;
+    }
+
+    #intro {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      display: flex;
+      justify-content: center;
+      transform: translate(-50%, -50%);
+      background-color: rgb(0, 0, 0);
+      background-color: rgba(0, 0, 0, 0.95);
+      width: 100%;
+      height: 100%;
+      z-index: 100;
+    }
+
+    #intro-content {
+      position: fixed;
+      left: 50%;
+      top: 1%;
+      display: flex;
+      transform: translate(-50%, -1%);
+    }
+
+    .csvlist {
+      height: 4vh;
+      font-size: 2.5vh;
+    }
+
+    .submitcsv {
+      height: 4vh;
+      font-size: 2.5vh;
+    }
+
+    #intro-text {
+      position: absolute;
+      top: 50%;
+      left: 70%;
+      transform: translate(-70%, -50%);
+    }
+
+    a {
+      font-size: 20vh;
+      color: yellow;
+    }
+
+    .getcoin_img {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      display: none;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      height: 90vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="intro">
+    <div id="intro-content">
+    </div>
+    <div id="intro-text">
+      <a>Battle Roulette</a>
+    </div>
+  </div>
+  <div class="wrapper">
+    <div class="q-btn-layout">
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a1">1</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a2">2</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a3">3</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a4">4</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a5">5</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a6">6</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a7">7</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a8">8</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a9">9</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a10">10</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a11">11</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a12">12</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a13">13</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a14">14</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a15">15</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a16">16</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a17">17</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a18">18</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a19">19</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a20">20</button>
+      <button class="q-btn" onclick="show_quest_modal(this); " id="a21">21</button>
+    </div>
+  </div>
+  <div id="quest" class="quest-modal">
+    <div class="stack" id="card-stack">
+    </div>
+    <img class="xbtn" onclick="tryagain()" src="fakeitembox.png">
+    <img id="obtn" class="obtn" src="itembox.png">
+  </div>
+  <div class="rwrapper" id="rwrapper">
+    <div class="explain">
+      <div class="exgrid">
+        <img class="explain_img" src="coin100.png">
+        <p>ゲット コイン</p>
+      </div>
+      <div class="exgrid">
+        <img class="explain_img" src="lightning.png">
+        <p>他のチーム:　-100<br>チーム: +100</p>
+      </div>
+      <div class="exgrid">
+        <img class="explain_img" src="boo.png">
+        <p>他のチーム:　-100<br>インビジブル: 1ターン</p>
+      </div>
+      <div class="exgrid">
+        <img class="explain_img" src="spinyshell.png">
+        <p>一位:　-200<br>チーム: +100</p>
+      </div>
+      <div class="exgrid">
+        <img class="explain_img" src="bob.png">
+        <p>選ばれたチーム: -200</p>
+      </div>
+      <div class="exgrid">
+        <img class="explain_img" src="bullet.png">
+        <p>一位になる</p>
+      </div>
+    </div>
+    <div class="roulette_container">
+      <div class="roulette">
+        <img class="roulette_img" src="bob.png">
+        <img class="roulette_img" src="lakitucoin.png">
+        <img class="roulette_img" src="lightning.png">
+        <img class="roulette_img" src="boo.png">
+        <img class="roulette_img" src="coin300.png">
+        <img class="roulette_img" src="spinyshell.png">
+        <img class="roulette_img" src="bullet.png">
+        <img class="roulette_img" src="coin200.png">
+      </div>
+    </div>
+  </div>
+  <img class="getcoin_img" src="coin100.png">
+  <script>
+    // load csv and generate dropdown with D3
+    d3.csv("../.globalcsv/1dropdownlist.csv").then(function (data) {
+      var dropDown = d3.select("#intro-content")
+        .append("select")
+        .attr("id", "csv")
+        .attr("class", "csvlist")
+        .attr("aria-label", "State")
+      dropDown
+        .on("change", function (d) {
+          var value = d3.select(this).property("value");
+        });
+
+      dropDown.selectAll("option")
+        .data(data)
+        .enter()
+        .append("option")
+        .attr("value", function (d) { return d.value; })
+        .text(function (d) { return d.label; });
+      // create submit button
+      let button = d3.select("#intro-content")
+        .append("button").attr("class", "submitcsv").attr("onclick", "loadcsv(); resetbtn(); start();").text("Submit")
+    });
+
+    // parse cvs from loaded csv list and generate array with papa parse
+    function loadcsv() {
+      removeold();
+      var select = document.getElementById('csv');
+      let value = select.options[select.selectedIndex].value;
+      console.log(value);
+      Papa.parse(value, {
+        download: true,
+        delimiter: ",",
+        complete: function (result) {
+          //console.log(result);
+          data = result.data;
+          renderData(data)
+          shuffle()
+        }
+      });
+    };
+
+    // remove old cards from deck
+    function removeold() {
+      var x, i;
+      x = document.querySelectorAll(".card");
+      for (i = 0; i < x.length; i++) {
+        x[i].remove();
+      }
+    }
+
+    // generate cards from parsed array
+    //data = undefined;
+    let cards_stack = document.getElementById("card-stack");
+    function renderData(data) {
+      for (let i = 1; i < data.length; i++) {
+        let card = document.createElement("div");
+        card.className = 'card'
+        card.style.display = 'none'
+        let html = ''
+        for (let j = 0; j < data[i].length; j++) {
+          if (j === 0) {
+            if (data[i][j] === '') return;
+            html += `${data[i][j]}`
+          }
+          card.innerHTML = html;
+          cards_stack.appendChild(card);
+          //display.style.display = "none";
+        }
+      }
+    }
+
+    // shuffle cards 
+    function shuffle() {
+      $(".stack").each(function () {
+        var divs = $(this).find('div');
+        for (var i = 0; i < divs.length; i++) $(divs[i]).remove();
+        //the fisher yates algorithm, from http://stackoverflow.com/questions/2450954/how-to-randomize-a-javascript-array
+        var i = divs.length;
+        if (i == 0) return false;
+        while (--i) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tempi = divs[i];
+          var tempj = divs[j];
+          divs[i] = tempj;
+          divs[j] = tempi;
+        }
+        for (var i = 0; i < divs.length; i++) $(divs[i]).appendTo(this);
+      });
+    }
+
+    //reset all buttons when new csv is selected
+    let btnreset = document.querySelectorAll("button");
+    function resetbtn() {
+      for (let i = 0; i < btnreset.length; i++) {
+        btnreset[i].disabled = false;
+        btnreset[i].classList.remove("disabled");
+      }
+    }
+
+    var modal1 = document.getElementById("quest");
+    var stack = document.querySelector(".stack");
+
+    // open question with onclick:'openquest(this);' and set id as global var
+    function show_quest_modal(q_element) {
+      modal1.style.display = "block";
+      let cardfirst = document.querySelector(".card:first-child");
+      let cardlast = document.querySelector(".card:last-child");
+      cardfirst.style.display = "flex";
+      stack.append(cardfirst);
+      cardlast.style.display = "none";
+      // adding window to clickedbtn will define clickedbtn as global var
+      window.clickedbtn = q_element;
+      clickedbtn.disabled = true;
+      clickedbtn.classList.add("disabled");
+    }
+
+    // preload images
+    function preloadImages(urls, allImagesLoadedCallback) {
+      var loadedCounter = 0;
+      var toBeLoadedNumber = urls.length;
+      urls.forEach(function (url) {
+        preloadImage(url, function () {
+          loadedCounter++;
+          // console.log('Number of loaded images: ' + loadedCounter);
+          if (loadedCounter == toBeLoadedNumber) {
+            allImagesLoadedCallback();
+          }
+        });
+      });
+      function preloadImage(url, anImageLoadedCallback) {
+        var img = new Image();
+        img.onload = anImageLoadedCallback;
+        img.src = url;
+      }
+    }
+
+    // Let's call it:
+    preloadImages([
+      "bob.png", "  coin100.png", "lightning.png", "coin200.png", "boo.png", "coin300.png",
+      "spinyshell.png", "coin100.png", "bullet.png"
+    ], function () {
+      // console.log('All images were loaded');
+    });
+
+    // close question modal
+    function tryagain() {
+      modal1.style.display = "none";
+      clickedbtn.disabled = false;
+      clickedbtn.classList.remove("disabled");
+    }
+
+    //close intro1 modal
+    function start() {
+      let hideintro = document.querySelector("#intro")
+      hideintro.setAttribute("style", "display: none");
+    }
+
+    function hideq_box() {
+      modal1.style.display = "none";
+    }
+
+    $(function () {
+      var rouletter = $('div.roulette');
+      rouletter.roulette();
+      $('.obtn').click(function () {
+        $(".quest-modal").hide();
+        rouletter.roulette('start');
+        $(".rwrapper").show();
+      });
+    });
+
+    $(function () {
+      $(".roulette_container").click(function () {
+        $(".rwrapper").hide();
+      });
+    });
+
+    $(window).ready(function () {
+      $(".rwrapper").hide();
+    });
+
+    $(function () {
+      $(".obtn").click(function () {
+        $(".getcoin_img").slideDown(300).delay(1200).fadeOut(200);
+      });
+    });
+  </script>
+</body>
+
+</html>
