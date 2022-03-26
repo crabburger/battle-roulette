@@ -1,7 +1,7 @@
 # battle-roulette
-upload csv with at least 21 lines
+upload csv with at least 3 lines
 
-sample file
+sample csv file
 
 Header <br>
 "<img src=""url"">" <br>
