@@ -3,6 +3,6 @@ upload csv with at least 21 lines
 
 sample file
 
-Header
-"<img src=""url"">"
+Header <br>
+"<img src=""url"">" <br>
 "<img src=""url"">"
