@@ -410,26 +410,7 @@
   </div>
   <img class="getcoin_img" src="coin100.png">
   <script>
-    // load csv and generate dropdown with D3
-    d3.csv("../.globalcsv/1dropdownlist.csv").then(function (data) {
-      var dropDown = d3.select("#intro-contentL")
-        .append("select")
-        .attr("id", "csv")
-        .attr("class", "csvlist")
-        .attr("aria-label", "State")
-      dropDown
-        .on("change", function (d) {
-          var value = d3.select(this).property("value");
-        });
-      dropDown.selectAll("option")
-        .data(data)
-        .enter()
-        .append("option")
-        .attr("value", function (d) { return d.value; })
-        .text(function (d) { return d.label; });
-      // create submit button
-      let button = d3.select("#intro-contentL")
-        .append("button").attr("class", "submitcsv").attr("onclick", "loadcsv(); resetbtn(); start();").text("Submit")
+  $(function() {
       // create input field
       let inputtext = d3.select("#intro-contentR")
         .append("label").attr("id", "inputtext").text("Use CSV file as input.")
@@ -438,26 +419,7 @@
       // create input submit button
       let button2 = d3.select("#intro-contentR")
         .append("button").attr("class", "submitcsv").attr("onclick", "parseupload(); resetbtn(); start();").text("Submit")
-
     });
-
-    // parse cvs from loaded csv list and generate array with papa parse
-    function loadcsv() {
-      removeold();
-      var select = document.getElementById('csv');
-      let value = select.options[select.selectedIndex].value;
-      console.log(value);
-      Papa.parse(value, {
-        download: true,
-        delimiter: ",",
-        complete: function (result) {
-          //console.log(result);
-          data = result.data;
-          renderData(data)
-          shuffle()
-        }
-      });
-    };
 
     // remove old cards from deck
     function removeold() {
@@ -470,6 +432,7 @@
 
     // parse upload
     function parseupload() {
+      removeold();
       var uploaded = document.getElementById("inputfile");
       Papa.parse(uploaded.files[0],
         {
