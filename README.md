@@ -2,7 +2,7 @@
 
 https://konsomepanchi.github.io/battle-roulette/
 
-upload csv of game questions.
+upload csv or text file of game questions.
 
 one entry per line. <br>
 URL to image ending in .JPEG, .PNG, .GIF, .WEBP, etc <br>
