@@ -5,7 +5,7 @@
 			speed: 150, // x > 0
 			stopImageNumber: null, // x >= 0 or null or -1
 			rollCount: 3, // x >= 0
-			duration: 1.5, //(x second)
+			duration: 0.2, //(x second)
 			stopCallback: function () {
 				//$('.obtn').removeAttr('disabled');
 				$(".roulette_container").click(function () {
